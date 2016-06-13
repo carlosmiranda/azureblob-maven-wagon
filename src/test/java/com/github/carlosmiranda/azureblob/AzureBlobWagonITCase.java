@@ -22,12 +22,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.maven.wagon.Wagon;
+import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -91,7 +91,6 @@ public final class AzureBlobWagonITCase {
      */
     @BeforeClass
     public static void createContainerAndFiles() throws Exception {
-        System.out.println("foo");
         Assume.assumeThat(
             true, Matchers.anyOf(
                 Matchers.is(AzureBlobWagonITCase.EMULATED_STORAGE),
@@ -102,7 +101,6 @@ public final class AzureBlobWagonITCase {
                 )
             )
         );
-        System.out.println("baz");
         final CloudBlobContainer container = AzureBlobWagonITCase.container();
         container.createIfNotExists();
         for (final Entry<String, String> entry
@@ -115,12 +113,21 @@ public final class AzureBlobWagonITCase {
     }
 
     /**
-     * AzureBlobWagon can get files.
+     * AzureBlobWagon can check if resources exist.
+     * @throws Exception If something goes wrong
      */
     @Test
-    @Ignore
-    public void canGetFiles() {
-        Assert.fail("Not yet implemented");
+    public void checksIfResourcesExist() throws Exception {
+        final Wagon wagon =
+            new AzureBlobWagon(AzureBlobWagonITCase.container());
+        for (final String file : AzureBlobWagonITCase.FILES.keySet()) {
+            MatcherAssert.assertThat(
+                wagon.resourceExists(file), Matchers.is(true)
+            );
+        }
+        MatcherAssert.assertThat(
+            wagon.resourceExists("does/not/exist"), Matchers.is(false)
+        );
     }
 
     /**
@@ -139,7 +146,6 @@ public final class AzureBlobWagonITCase {
      */
     private static CloudBlobContainer container() throws Exception {
         final CloudStorageAccount account = AzureBlobWagonITCase.account();
-        System.out.println(AzureBlobWagonITCase.STORAGE_CONTAINER);
         return account.createCloudBlobClient().
             getContainerReference(AzureBlobWagonITCase.STORAGE_CONTAINER);
     }

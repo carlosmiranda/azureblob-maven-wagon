@@ -15,9 +15,11 @@
  */
 package com.github.carlosmiranda.azureblob;
 
+import com.microsoft.azure.storage.StorageException;
+import com.microsoft.azure.storage.blob.CloudBlobContainer;
 import java.io.File;
+import java.net.URISyntaxException;
 import java.util.List;
-
 import org.apache.maven.wagon.ConnectionException;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.TransferFailedException;
@@ -37,11 +39,17 @@ import org.apache.maven.wagon.repository.Repository;
  * @author Carlos Miranda (miranda.cma+azureblob.wagon@gmail.com)
  */
 final class AzureBlobWagon implements Wagon {
+    /**
+     * Cloud blob client.
+     */
+    private final CloudBlobContainer container;
 
     /**
-     * Default constructor.
+     * Get instance using with the specified container.
+     * @param container CloudBlob Container
      */
-    AzureBlobWagon() {
+    AzureBlobWagon(final CloudBlobContainer container) {
+        this.container = container;
     }
 
     @Override
@@ -77,17 +85,21 @@ final class AzureBlobWagon implements Wagon {
     }
 
     @Override
-    public boolean resourceExists(final String resourceName)
-            throws TransferFailedException, AuthorizationException {
-        // TODO Auto-generated method stub
-        return false;
+    public boolean resourceExists(final String resource)
+        throws TransferFailedException {
+        try {
+            return this.container.getBlockBlobReference(resource).exists();
+        } catch (final StorageException | URISyntaxException ex) {
+            throw new TransferFailedException(
+                String.format("Failed to get resource '%s'", resource), ex
+            );
+        }
     }
 
     @Override
     public List<String> getFileList(final String destinationDirectory)
             throws TransferFailedException, ResourceDoesNotExistException,
             AuthorizationException {
-        // TODO Auto-generated method stub
         return null;
     }
 
