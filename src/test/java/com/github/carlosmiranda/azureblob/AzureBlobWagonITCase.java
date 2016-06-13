@@ -15,8 +15,12 @@
  */
 package com.github.carlosmiranda.azureblob;
 
+import com.google.common.collect.ImmutableMap;
 import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.blob.CloudBlobContainer;
+import java.nio.charset.StandardCharsets;
+import java.util.Map;
+import java.util.Map.Entry;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.hamcrest.Matchers;
 import org.junit.AfterClass;
@@ -63,15 +67,23 @@ public final class AzureBlobWagonITCase {
      */
     private static final String STORAGE_CONTAINER = String.format(
         // @checkstyle MagicNumber (2 lines)
-        "%s-%s", "wagon-test-",
+        "%s-%s", "wagon-test",
         RandomStringUtils.randomAlphabetic(20).toLowerCase()
     );
-
     /**
      * Storage container.
      */
     private static final boolean EMULATED_STORAGE =
         Boolean.valueOf(System.getProperty("storage.emulated"));
+
+    /**
+     * Files.
+     */
+    private static final Map<String, String> FILES = ImmutableMap.of(
+        "path/to/first.txt", "abcde",
+        "path/to/second.txt", "defgh",
+        "another/path/here.txt", "12345"
+    );
 
     /**
      * Set up container and files.
@@ -91,7 +103,15 @@ public final class AzureBlobWagonITCase {
             )
         );
         System.out.println("baz");
-        AzureBlobWagonITCase.container().createIfNotExists();
+        final CloudBlobContainer container = AzureBlobWagonITCase.container();
+        container.createIfNotExists();
+        for (final Entry<String, String> entry
+            : AzureBlobWagonITCase.FILES.entrySet()) {
+            final byte[] data =
+                entry.getValue().getBytes(StandardCharsets.UTF_8);
+            container.getBlockBlobReference(entry.getKey())
+                .uploadFromByteArray(data, 0, data.length);
+        }
     }
 
     /**
