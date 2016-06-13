@@ -17,6 +17,8 @@ package com.github.carlosmiranda.azureblob;
 
 import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.blob.CloudBlobContainer;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.hamcrest.Matchers;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Assume;
@@ -26,6 +28,23 @@ import org.junit.Test;
 
 /**
  * Integration test for {@link AzureBlobWagon}.
+ *
+ * <p> This integration test can use either a real Azure Storage account or
+ * emulated storage.
+ *
+ * <p>To use Emulated Storage, you must specify your account name and key. This
+ * can be done by specifying the environment variables
+ * <code>storage.name</code> and <code>storage.key</code> respectively, with the
+ * appropriate values.
+ *
+ * <p>To use Emulated Storage, you must specify the environment variable
+ * <code>storage.emulated</code> with a value of <code>true</code>. Note that if
+ * specified, use of emulated storage will take precedence over the real Azure
+ * storage account details.
+ *
+ * The IT case will create and delete a container named
+ * <code>wagon-test-[suffix]</code>, where [suffix] is a random string with 20
+ * lowercase characters.
  *
  * @author Carlos Miranda (miranda.cma+azureblob.wagon@gmail.com)
  */
@@ -40,10 +59,19 @@ public final class AzureBlobWagonITCase {
      */
     private static final String STORAGE_KEY = System.getProperty("storage.key");
     /**
+     * Storage container name.
+     */
+    private static final String STORAGE_CONTAINER = String.format(
+        // @checkstyle MagicNumber (2 lines)
+        "%s-%s", "wagon-test-",
+        RandomStringUtils.randomAlphabetic(20).toLowerCase()
+    );
+
+    /**
      * Storage container.
      */
-    private static final String STORAGE_CONTAINER =
-        System.getProperty("storage.container");
+    private static final boolean EMULATED_STORAGE =
+        Boolean.valueOf(System.getProperty("storage.emulated"));
 
     /**
      * Set up container and files.
@@ -51,11 +79,18 @@ public final class AzureBlobWagonITCase {
      */
     @BeforeClass
     public static void createContainerAndFiles() throws Exception {
-        Assume.assumeNotNull(
-            AzureBlobWagonITCase.STORAGE_ACCOUNT,
-            AzureBlobWagonITCase.STORAGE_KEY,
-            AzureBlobWagonITCase.STORAGE_CONTAINER
+        System.out.println("foo");
+        Assume.assumeThat(
+            true, Matchers.anyOf(
+                Matchers.is(AzureBlobWagonITCase.EMULATED_STORAGE),
+                Matchers.is(
+                    AzureBlobWagonITCase.STORAGE_ACCOUNT != null
+                    && AzureBlobWagonITCase.STORAGE_KEY != null
+                    && AzureBlobWagonITCase.STORAGE_CONTAINER != null
+                )
+            )
         );
+        System.out.println("baz");
         AzureBlobWagonITCase.container().createIfNotExists();
     }
 
@@ -83,13 +118,31 @@ public final class AzureBlobWagonITCase {
      * @throws Exception If something goes wrong
      */
     private static CloudBlobContainer container() throws Exception {
-        return CloudStorageAccount.parse(
-            new AzureStorageCredentials(
-                AzureBlobWagonITCase.STORAGE_ACCOUNT,
-                AzureBlobWagonITCase.STORAGE_KEY,
-                false
-            ).connectionString()
-        ).createCloudBlobClient()
-            .getContainerReference(AzureBlobWagonITCase.STORAGE_CONTAINER);
+        final CloudStorageAccount account = AzureBlobWagonITCase.account();
+        System.out.println(AzureBlobWagonITCase.STORAGE_CONTAINER);
+        return account.createCloudBlobClient().
+            getContainerReference(AzureBlobWagonITCase.STORAGE_CONTAINER);
     }
+
+    /**
+     * Get cloud storage account.
+     * @return Cloud storage account.
+     * @throws Exception if something goes wrong
+     */
+    private static CloudStorageAccount account() throws Exception {
+        final CloudStorageAccount account;
+        if (AzureBlobWagonITCase.EMULATED_STORAGE) {
+            account = CloudStorageAccount.getDevelopmentStorageAccount();
+        } else {
+            account = CloudStorageAccount.parse(
+                new AzureStorageCredentials(
+                    AzureBlobWagonITCase.STORAGE_ACCOUNT,
+                    AzureBlobWagonITCase.STORAGE_KEY,
+                    false
+                ).connectionString()
+            );
+        }
+        return account;
+    }
+
 }
