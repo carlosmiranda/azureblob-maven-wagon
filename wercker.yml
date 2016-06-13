@@ -9,4 +9,4 @@ build:
   after-steps:
     - script:
         name: Publish code coverage
-        code: mvn jacoco:report coveralls:report -Dcoveralls.token=$COVERALLS_TOKEN
+        code: mvn clean test jacoco:report coveralls:report -Dcoveralls.token=$COVERALLS_TOKEN
