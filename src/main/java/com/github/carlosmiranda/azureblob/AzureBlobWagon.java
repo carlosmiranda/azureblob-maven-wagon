@@ -41,7 +41,7 @@ final class AzureBlobWagon implements Wagon {
     /**
      * Default constructor.
      */
-    public AzureBlobWagon() {
+    AzureBlobWagon() {
     }
 
     @Override

@@ -77,15 +77,7 @@
         <property name="message" value="Two consecutive empty lines"/>
     </module>
 
-    <!-- Checks for Header -->
-    <module name="Header">
-        <property name="header" value="${header}"/>
-        <property name="fileExtensions" value="java"/>
-    </module>
-
     <module name="TreeWalker">
-        <property name="cacheFile" value="${cache.file}" />
-
         <!-- to enable suppressions -->
         <module name="FileContentsHolder"/>
 
@@ -226,27 +218,14 @@
         <module name="AbstractClassName"/>
         <module name="ClassTypeParameterName"/>
         <module name="ConstantName"/>
-        <module name="LocalFinalVariableName">
-            <property name="format" value="^(id|[a-z]{3,12})$"/>
-            <property name="tokens" value="VARIABLE_DEF"/>
-        </module>
-        <module name="LocalVariableName">
-            <property name="format" value="^(id|[a-z]{3,12})$"/>
-        </module>
-        <module name="CatchParameterName">
-            <property name="format" value="^(ex|[a-z]{3,12})$"/>
-        </module>
-        <module name="MemberName">
-            <property name="format" value="^(id|[a-z]{3,12})$"/>
-        </module>
+<!--         <module name="CatchParameterName"> -->
+<!--             <property name="format" value="^(ex|[a-z]{3,12})$"/> -->
+<!--         </module> -->
         <module name="MethodName">
             <property name="format" value="^[a-z]{2,}[a-zA-Z]+$"/>
         </module>
         <module name="MethodTypeParameterName"/>
         <module name="PackageName"/>
-        <module name="ParameterName">
-            <property name="format" value="^(id|[a-z]{3,})$"/>
-        </module>
         <module name="StaticVariableName"/>
         <module name="TypeName"/>
 

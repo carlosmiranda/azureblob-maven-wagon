@@ -75,7 +75,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-pmd-plugin</artifactId>
-                <version>3.6</version>
                 <executions>
                     <execution>
                         <goals>
@@ -99,13 +98,8 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <checkstyleRules>
-                        <module name="Checker">
-                            <module name="NewlineAtEndOfFile">
-                                <property name="lineSeparator" value="lf" />
-                            </module>
-                        </module>
-                    </checkstyleRules>
+                    <includeTestSourceDirectory>true</includeTestSourceDirectory>
+                    <configLocation>checkstyle.xml</configLocation>
                 </configuration>
             </plugin>
             <plugin>
@@ -149,6 +143,11 @@
                     <artifactId>jacoco-maven-plugin</artifactId>
                     <version>0.7.7.201606060606</version>
                 </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-pmd-plugin</artifactId>
+                    <version>3.6</version>
+                </plugin>
             </plugins>
         </pluginManagement>
     </build>
@@ -158,6 +157,10 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>findbugs-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-pmd-plugin</artifactId>
             </plugin>
             <plugin>
                 <groupId>org.jacoco</groupId>
