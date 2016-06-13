@@ -91,16 +91,7 @@ public final class AzureBlobWagonITCase {
      */
     @BeforeClass
     public static void createContainerAndFiles() throws Exception {
-        Assume.assumeThat(
-            true, Matchers.anyOf(
-                Matchers.is(AzureBlobWagonITCase.EMULATED_STORAGE),
-                Matchers.is(
-                    AzureBlobWagonITCase.STORAGE_ACCOUNT != null
-                    && AzureBlobWagonITCase.STORAGE_KEY != null
-                    && AzureBlobWagonITCase.STORAGE_CONTAINER != null
-                )
-            )
-        );
+        Assume.assumeTrue(AzureBlobWagonITCase.testShouldExecute());
         final CloudBlobContainer container = AzureBlobWagonITCase.container();
         container.createIfNotExists();
         for (final Entry<String, String> entry
@@ -136,7 +127,9 @@ public final class AzureBlobWagonITCase {
      */
     @AfterClass
     public static void removeContainer() throws Exception {
-        AzureBlobWagonITCase.container().deleteIfExists();
+        if (AzureBlobWagonITCase.testShouldExecute()) {
+            AzureBlobWagonITCase.container().deleteIfExists();
+        }
     }
 
     /**
@@ -169,6 +162,16 @@ public final class AzureBlobWagonITCase {
             );
         }
         return account;
+    }
+
+    /**
+     * Should this test execute?
+     * @return true, if proper environment variables are specified
+     */
+    private static boolean testShouldExecute() {
+        return AzureBlobWagonITCase.EMULATED_STORAGE
+            || AzureBlobWagonITCase.STORAGE_ACCOUNT != null
+            && AzureBlobWagonITCase.STORAGE_KEY != null;
     }
 
 }
